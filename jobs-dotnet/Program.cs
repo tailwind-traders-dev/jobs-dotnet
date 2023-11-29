@@ -111,6 +111,6 @@ switch (args[0])
         return 0;
 
     default:
-        Console.WriteLine($"Invalid command: {args[0]}");
+        Console.WriteLine($"Invalid command: {args[0]}. Valid commands: send, receive");
         return 1;
 }
