@@ -1,11 +1,8 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Azure.Identity;
 
-var config = Viper.Config();
-var sbHostname = config.Get("AZURE_SERVICEBUS_HOSTNAME");
-var sbQueueName = config.Get("AZURE_SERVICEBUS_QUEUE_NAME");
 
-async void SendMessages()
+async void SendMessages(string sbHostname, string sbQueueName)
 {
     var clientOptions = new ServiceBusClientOptions
     {
@@ -42,7 +39,7 @@ async void SendMessages()
     }
 }
 
-async void ReceiveMessages()
+async void ReceiveMessages(string sbHostname, string sbQueueName)
 {
     var clientOptions = new ServiceBusClientOptions()
     {
@@ -91,23 +88,44 @@ void Pause()
     cancellationTokenSource.Token.WaitHandle.WaitOne();
 }
 
+void Hello() {
+    Console.WriteLine("hello, world...");
+}
+
 if (args.Length == 0)
 {
     Console.WriteLine("No command provided.");
     return 0;
 }
 
+var sbHostname = Environment.GetEnvironmentVariable("AZURE_SERVICEBUS_HOSTNAME");
+var sbQueueName = Environment.GetEnvironmentVariable("AZURE_SERVICEBUS_QUEUE_NAME");
+
 switch (args[0])
 {
     case "send":
         Console.WriteLine("Sending.");
-        SendMessages();
+        if (sbHostname == null || sbQueueName == null)
+        {
+            Console.WriteLine("Please set the AZURE_SERVICEBUS_HOSTNAME and AZURE_SERVICEBUS_QUEUE_NAME environment variables.");
+            return 1;
+        }
+        SendMessages(sbHostname, sbQueueName);
         return 0;
 
     case "receive":
         Console.WriteLine("Receiving.");
-        ReceiveMessages();
+        if (sbHostname == null || sbQueueName == null)
+        {
+            Console.WriteLine("Please set the AZURE_SERVICEBUS_HOSTNAME and AZURE_SERVICEBUS_QUEUE_NAME environment variables.");
+            return 1;
+        }
+        ReceiveMessages(sbHostname, sbQueueName);
         Pause();
+        return 0;
+
+    case "hello":
+        Hello();
         return 0;
 
     default:
